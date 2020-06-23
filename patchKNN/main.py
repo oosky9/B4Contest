@@ -12,7 +12,7 @@ from utils import load_dataset, get_patch_dataset, patch_integrator, write_mhd_a
 from tqdm import tqdm
 
 DATA_DIR = '../train'
-FEATURE_DIR = './features/DiscGauss/'
+FEATURE_DIR = './features/LevelSet/'
 CASE_LIST_PATH = DATA_DIR + '/case_list.txt'
 
 class nFoldCrossVaridation:

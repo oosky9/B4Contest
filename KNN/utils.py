@@ -46,14 +46,19 @@ def load_dataset(data_list, label_list, normalize=False, flat=True):
     return data, label
 
 
-def load_sitk_dataset(data_list):
+def load_sitk_dataset(data_list, label_list):
 
     data = []
     for d in data_list:
         itk_img = sitk.ReadImage(d)
         data.append(itk_img)
     
-    return data
+    label = []
+    for l in label_list:
+        itk_img = sitk.ReadImage(l)
+        label.append(itk_img)
+    
+    return data, label
 
 def write_mhd_and_raw(Data, path):
     """

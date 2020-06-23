@@ -2,7 +2,7 @@ import SimpleITK as sitk
 import numpy as np
 
 from utils import load_dataset, load_sitk_dataset, write_mhd_and_raw
-
+from filters import GaussianFilter, MaxFilter, LevelSet
 import os
 import argparse
 
@@ -45,13 +45,35 @@ def filters(sitk_img, filter=None):
     elif filter == 'DiscGauss':
         out = sitk.DiscreteGaussianImageFilter().Execute(sitk_img)
         return out
+    elif filter == 'Gauss':
+        np_img = sitk.GetArrayFromImage(sitk_img)
+        out = GaussianFilter().Execute(np_img)
+        out = sitk.GetImageFromArray(out)
+        return out
+    elif filter == 'Max':
+        np_img = sitk.GetArrayFromImage(sitk_img)
+        out = MaxFilter().Execute(np_img)
+        out = sitk.GetImageFromArray(out)
+        return out
+    elif filter == 'GaussToMax':
+        np_img = sitk.GetArrayFromImage(sitk_img)
+        out = GaussianFilter().Execute(np_img)
+        out = MaxFilter().Execute(out)
+        out = sitk.GetImageFromArray(out)
+        return out
+    elif filter == 'LevelSet':
+        np_img = sitk.GetArrayFromImage(sitk_img)
+        out = LevelSet().Execute(np_img)
+        out = sitk.GetImageFromArray(out)
+        return out
 
 def arg_parser():
     parser = argparse.ArgumentParser()
 
     parser.add_argument('--save_path', type=str, default='./features/')
-    parser.add_argument('--filter', type=str, default='DiscGauss',
-     help=['LoG', 'Sigmoid', 'LaplacianSharp', 'BlackTop', 'WhiteTop', 'Median', 'Mean', 'RecGauss'])
+    parser.add_argument('--filter', type=str, default='LevelSet',
+     help=['LoG', 'Sigmoid', 'LaplacianSharp', 'BlackTop', 'WhiteTop', 'Median', 
+     'Mean', 'RecGauss', 'DiscGauss', 'Gauss', 'Max', 'GaussToMax', 'LevelSet'])
 
     args = parser.parse_args()
     return args
@@ -67,11 +89,16 @@ def main(args):
         d_lis.append(os.path.join(DATA_DIR, 'Image', case + '.mhd'))
         l_lis.append(os.path.join(DATA_DIR, 'Label', case + '.mhd'))
 
-    itk_im_list = load_sitk_dataset(d_lis)
+    itk_im_list, itk_lb_list = load_sitk_dataset(d_lis, l_lis)
 
-    for i, im in enumerate(itk_im_list):
-        ed_im = filters(im, args.filter)
-        write_mhd_and_raw(ed_im, os.path.join(args.save_path, args.filter, case_list[i] + '.mhd'))
+    if args.filter == 'LevelSet':
+        for i, lb in enumerate(itk_lb_list):
+            ed_im = filters(lb, args.filter)
+            write_mhd_and_raw(ed_im, os.path.join(args.save_path, args.filter, case_list[i] + '.mhd'))
+    else:
+        for i, im in enumerate(itk_im_list):
+            ed_im = filters(im, args.filter)
+            write_mhd_and_raw(ed_im, os.path.join(args.save_path, args.filter, case_list[i] + '.mhd'))
 
 
 if __name__ == '__main__':

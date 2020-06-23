@@ -39,6 +39,25 @@ def load_dataset(data_list, label_list, normalize=False, flat=True):
 
     return data, label
 
+def load_test_dataset(data_list, normalize=False, flat=True):
+
+    data = []
+    for d in data_list:
+        itk_img = sitk.ReadImage(d)
+        img = sitk.GetArrayFromImage(itk_img)
+        if flat:
+            data.append(img.flatten().astype(np.float32))
+        else:
+            data.append(img.astype(np.float32))
+
+    data = np.asarray(data)
+
+    if normalize:
+        data = normalizing(data)
+
+    return data
+
+
 def get_patch_dataset(data, label, patch_size):
     p_sz = patch_size
     
@@ -60,6 +79,23 @@ def get_patch_dataset(data, label, patch_size):
     data_set = np.asarray(data_set)
     label_set = np.asarray(label_set)
     return data_set, label_set
+
+def get_test_patch_dataset(data, patch_size):
+    p_sz = patch_size
+    
+    assert data.shape[1] % p_sz == 0
+    assert data.shape[2] % p_sz == 0
+
+    data_set = []
+        
+    for w in range(0, data.shape[2], p_sz):
+        for h in range(0, data.shape[1], p_sz):
+            data_patch = []
+            for i in range(data.shape[0]):
+                data_patch.append(data[i, h:h+p_sz, w:w+p_sz].flatten())
+            data_set.append(np.asarray(data_patch))
+    data_set = np.asarray(data_set)
+    return data_set
 
 def patch_integrator(patch_list, image_size, patch_size):
     i_sz = image_size

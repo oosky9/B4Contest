@@ -117,14 +117,14 @@ def arg_parser():
 
     parser.add_argument('--save_path', type=str, default='./result/')
     parser.add_argument('--max_k', type=int, default=30)
-    parser.add_argument('--min_k', type=int, default=10)
+    parser.add_argument('--min_k', type=int, default=1)
     parser.add_argument('--img_shape', type=tuple, default=(1024, 512))
     parser.add_argument('--seed', type=int, default=0)
     parser.add_argument('--n_fold', type=int, default=6)
     parser.add_argument('--normalize', type=bool, default=False)
-    parser.add_argument('--check_filter', type=bool, default=True)
+    parser.add_argument('--check_filter', type=bool, default=False)
     parser.add_argument('--app_feature', type=bool, default=True)
-    parser.add_argument('--feature_path', type=str, default='./features/Median/')
+    parser.add_argument('--feature_path', type=str, default='./features/LevelSet/')
     parser.add_argument('--dist', type=str, default='l2', help=['l1', 'l2'])
 
     args = parser.parse_args()
@@ -157,7 +157,8 @@ def main(args):
 
         if args.check_filter:
             x_train, y_train = load_dataset(x_t[tl:], y_t[tl:], args.normalize)
-            x_valid, y_valid = load_dataset(x_v[vl:], y_v[vl:], args.normalize)
+            # x_valid, y_valid = load_dataset(x_v[vl:], y_v[tl:], args.normalize)
+            x_valid, y_valid = load_dataset(x_v[:vl], y_v[vl:], args.normalize) # for Level Set
 
         else:
             x_train, y_train = load_dataset(x_t, y_t, args.normalize)
